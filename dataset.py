@@ -51,9 +51,9 @@ class DogDataset(Dataset):
             images = self.image_list
         else:
             images = os.listdir(os.path.join(self.root_path, 'images'))
-        for image in self.image_list:
+        for image in images:
             label = self.label_map[image]
-            image = os.path.join(self.root_path, image)
+            image = os.path.join(self.root_path, 'images', image)
             self.train_images.append(image)
             self.train_labels.append(label)
 

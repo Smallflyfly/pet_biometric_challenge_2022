@@ -83,7 +83,7 @@ def train():
     model_path = 'weights/resnet101-5d3b4d8f.pth'
     model = model.cuda()
     load_pretrained_weight(model, model_path)
-    loss_func = FocalLoss(class_num=10)
+    loss_func = FocalLoss(class_num=6000)
     optimizer = build_optimizer(model, optim='adam', lr=0.0005)
     scheduler = build_scheduler(optimizer, lr_scheduler='cosine')
     cudnn.benchmark = True
