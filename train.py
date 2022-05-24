@@ -18,6 +18,7 @@ from loss import FocalLoss
 from model import my_resnet101
 from utils import seed_it, load_pretrained_weight, build_optimizer, build_scheduler
 import numpy as np
+import tensorboardX as tb
 
 
 parser = argparse.ArgumentParser()
@@ -30,6 +31,8 @@ K_FOLD = 8
 WIDTH = 448
 EPOCH = args.EPOCHS
 BATCH_SIZE = args.BATCH
+
+writer = tb.SummaryWriter()
 
 
 def val_model(model, val_dataloader):
@@ -50,7 +53,7 @@ def run_train(model, train_dataloader, val_dataloader, loss_func, optimizer, sch
     best_acc = 0
     for epoch in range(1, EPOCH + 1):
         model.train()
-        for i, data in enumerate(train_dataloader):
+        for index, data in enumerate(train_dataloader):
             image, label = data
             image = image.cuda()
             label = label.cuda()
@@ -60,13 +63,19 @@ def run_train(model, train_dataloader, val_dataloader, loss_func, optimizer, sch
             loss.backward()
             optimizer.step()
 
-            if i % 50 == 0:
+            if index % 50 == 0:
                 print('Fold:{} Epoch:[{}/{} {}/{}] lr:{:6f} loss:{:6f}:'.format(
-                    fold + 1, epoch, EPOCH, i, len(train_dataloader), optimizer.param_groups[-1]['lr'], loss.item()))
+                    fold + 1, epoch, EPOCH, index, len(train_dataloader), optimizer.param_groups[-1]['lr'], loss.item()))
+
+            if index % 20 == 0:
+                writer.add_scalar('loss', loss, index)
+                writer.add_scalar('lr', optimizer.param_groups[-1]['lr'], index)
 
         scheduler.step()
         val_acc = val_model(model, val_dataloader)
         print('Fold:{}/Epoch:{} val acc: {:6f}'.format(fold + 1, epoch, val_acc))
+        writer.add_scalar('val_acc', val_acc, fold * EPOCH + epoch)
+
         if val_acc > best_acc:
             best_acc = val_acc
             torch.save(model.state_dict(), 'best_k_train_{}_fold.pth'.format(fold + 1))
@@ -98,3 +107,4 @@ def train():
 
 if __name__ == '__main__':
     train()
+    writer.close()
