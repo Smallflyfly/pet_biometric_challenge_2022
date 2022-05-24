@@ -4,13 +4,13 @@
 @Author  ：fangpf
 @Date    ：2022/5/17 18:20 
 """
+from typing import Type, Any, Callable, Union, List, Optional
+
 import torch
 from torch import nn, Tensor
 from torch.hub import load_state_dict_from_url
-from torchvision.models import resnet101, ResNet
-from typing import Type, Any, Callable, Union, List, Optional
-
-from torchvision.models.resnet import BasicBlock, Bottleneck, _resnet, model_urls
+from torchvision.models import ResNet
+from torchvision.models.resnet import BasicBlock, Bottleneck, model_urls
 
 
 class MyResNet(ResNet):
